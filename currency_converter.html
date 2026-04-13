@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>محول العملات</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0f14;
+    --surface: #141820;
+    --surface2: #1c2230;
+    --border: #252d3d;
+    --accent: #00d4aa;
+    --accent2: #0099ff;
+    --text: #e8edf5;
+    --muted: #6b7a99;
+    --danger: #ff4757;
+    --gold: #f5a623;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 0 40px;
+    overflow-x: hidden;
+  }
+
+  header {
+    width: 100%;
+    max-width: 480px;
+    padding: 24px 20px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+
+  .logo-text {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+
+  .rate-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(0,212,170,0.1);
+    border: 1px solid rgba(0,212,170,0.25);
+    padding: 4px 10px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .main {
+    width: 100%;
+    max-width: 480px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .currency-block {
+    padding: 18px 18px 14px;
+  }
+
+  .block-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .currency-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .flag-select {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    cursor: pointer;
+    min-width: 120px;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+
+  .flag-select:hover { border-color: var(--accent); }
+
+  .flag { font-size: 20px; line-height: 1; }
+
+  .currency-code {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .arrow-down {
+    font-size: 10px;
+    color: var(--muted);
+    margin-right: auto;
+  }
+
+  .amount-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: 'Space Mono', monospace;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    text-align: left;
+    direction: ltr;
+    width: 100%;
+  }
+
+  .amount-input::placeholder { color: var(--border); }
+
+  .result-amount {
+    flex: 1;
+    font-family: 'Space Mono', monospace;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--accent);
+    text-align: left;
+    direction: ltr;
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin: -4px 0;
+    z-index: 2;
+  }
+
+  .swap-btn {
+    width: 40px; height: 40px;
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    color: var(--accent);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    z-index: 2;
+  }
+
+  .swap-btn:active { transform: scale(0.9) rotate(180deg); background: var(--accent); color: var(--bg); }
+
+  .rate-info {
+    background: var(--surface2);
+    border-top: 1px solid var(--border);
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+  }
+
+  .rate-val { color: var(--gold); font-weight: 700; }
+
+  .convert-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 14px;
+    color: #000;
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: opacity 0.2s, transform 0.1s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+
+  .convert-btn:active { opacity: 0.85; transform: scale(0.98); }
+  .convert-btn:disabled { opacity: 0.4; cursor: default; }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    padding: 4px 0 8px;
+  }
+
+  .popular-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .popular-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .popular-card:hover { border-color: var(--accent); background: var(--surface2); }
+  .popular-card:active { transform: scale(0.97); }
+
+  .pop-pair { font-size: 12px; font-family: 'Space Mono', monospace; color: var(--muted); }
+
+  .pop-rate {
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Space Mono', monospace;
+    color: var(--text);
+  }
+
+  .pop-change {
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .pos { color: var(--accent); }
+  .neg { color: var(--danger); }
+
+  select.native-select {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    opacity: 0;
+    width: 100%;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .loading {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--muted);
+    padding: 8px 0;
+  }
+
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-msg {
+    font-size: 12px;
+    color: var(--danger);
+    padding: 6px 0;
+    display: none;
+  }
+
+  #lastUpdated {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    text-align: center;
+    padding: 4px 0;
+  }
+
+  .skeleton {
+    background: linear-gradient(90deg, var(--surface2) 25%, var(--border) 50%, var(--surface2) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s infinite;
+    border-radius: 6px;
+    height: 16px;
+    width: 80px;
+  }
+
+  @keyframes shimmer { to { background-position: -200% 0; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">💱</div>
+    <div class="logo-text">محول العملات</div>
+  </div>
+  <div class="rate-badge">
+    <div class="dot"></div>
+    <span id="liveLabel">جاري التحميل...</span>
+  </div>
+</header>
+
+<div class="main">
+
+  <div class="card">
+    <div class="currency-block">
+      <div class="block-label">من</div>
+      <div class="currency-row">
+        <div class="flag-select" id="fromSelect">
+          <span class="flag" id="fromFlag">🇺🇸</span>
+          <span class="currency-code" id="fromCode">USD</span>
+          <span class="arrow-down">▾</span>
+          <select class="native-select" id="fromCurrency" onchange="onFromChange()"></select>
+        </div>
+        <input class="amount-input" id="amountInput" type="number" inputmode="decimal" placeholder="0.00" value="1" min="0">
+      </div>
+    </div>
+    <div class="rate-info">
+      <span id="rateLabel">سعر الصرف</span>
+      <span class="rate-val" id="rateDisplay"><div class="skeleton"></div></span>
+    </div>
+  </div>
+
+  <div class="divider">
+    <button class="swap-btn" onclick="swapCurrencies()" title="تبديل">⇅</button>
+  </div>
+
+  <div class="card">
+    <div class="currency-block">
+      <div class="block-label">إلى</div>
+      <div class="currency-row">
+        <div class="flag-select" id="toSelect">
+          <span class="flag" id="toFlag">🇸🇦</span>
+          <span class="currency-code" id="toCode">SAR</span>
+          <span class="arrow-down">▾</span>
+          <select class="native-select" id="toCurrency" onchange="onToChange()"></select>
+        </div>
+        <div class="result-amount" id="resultDisplay">—</div>
+      </div>
+    </div>
+    <div class="rate-info">
+      <span id="inverseLabel">معكوس</span>
+      <span class="rate-val" id="inverseDisplay">—</span>
+    </div>
+  </div>
+
+  <div class="error-msg" id="errorMsg">تعذّر تحميل الأسعار. تحقق من الاتصال.</div>
+
+  <button class="convert-btn" id="convertBtn" onclick="convert()">
+    <span>تحويل</span>
+    <span>→</span>
+  </button>
+
+  <div id="lastUpdated"></div>
+
+  <div class="section-title">أزواج شائعة</div>
+
+  <div class="popular-grid" id="popularGrid">
+    <div class="popular-card"><div class="skeleton" style="width:60px"></div><div class="skeleton" style="width:90px;margin-top:4px"></div></div>
+    <div class="popular-card"><div class="skeleton" style="width:60px"></div><div class="skeleton" style="width:90px;margin-top:4px"></div></div>
+    <div class="popular-card"><div class="skeleton" style="width:60px"></div><div class="skeleton" style="width:90px;margin-top:4px"></div></div>
+    <div class="popular-card"><div class="skeleton" style="width:60px"></div><div class="skeleton" style="width:90px;margin-top:4px"></div></div>
+  </div>
+
+</div>
+
+<script>
+const CURRENCIES = [
+  {code:'USD',name:'دولار أمريكي',flag:'🇺🇸'},
+  {code:'EUR',name:'يورو',flag:'🇪🇺'},
+  {code:'GBP',name:'جنيه إسترليني',flag:'🇬🇧'},
+  {code:'SAR',name:'ريال سعودي',flag:'🇸🇦'},
+  {code:'AED',name:'درهم إماراتي',flag:'🇦🇪'},
+  {code:'KWD',name:'دينار كويتي',flag:'🇰🇼'},
+  {code:'QAR',name:'ريال قطري',flag:'🇶🇦'},
+  {code:'BHD',name:'دينار بحريني',flag:'🇧🇭'},
+  {code:'OMR',name:'ريال عُماني',flag:'🇴🇲'},
+  {code:'JOD',name:'دينار أردني',flag:'🇯🇴'},
+  {code:'EGP',name:'جنيه مصري',flag:'🇪🇬'},
+  {code:'DZD',name:'دينار جزائري',flag:'🇩🇿'},
+  {code:'MAD',name:'درهم مغربي',flag:'🇲🇦'},
+  {code:'TND',name:'دينار تونسي',flag:'🇹🇳'},
+  {code:'LYD',name:'دينار ليبي',flag:'🇱🇾'},
+  {code:'SDG',name:'جنيه سوداني',flag:'🇸🇩'},
+  {code:'IQD',name:'دينار عراقي',flag:'🇮🇶'},
+  {code:'SYP',name:'ليرة سورية',flag:'🇸🇾'},
+  {code:'LBP',name:'ليرة لبنانية',flag:'🇱🇧'},
+  {code:'YER',name:'ريال يمني',flag:'🇾🇪'},
+  {code:'JPY',name:'ين ياباني',flag:'🇯🇵'},
+  {code:'CNY',name:'يوان صيني',flag:'🇨🇳'},
+  {code:'INR',name:'روبية هندية',flag:'🇮🇳'},
+  {code:'PKR',name:'روبية باكستانية',flag:'🇵🇰'},
+  {code:'TRY',name:'ليرة تركية',flag:'🇹🇷'},
+  {code:'RUB',name:'روبل روسي',flag:'🇷🇺'},
+  {code:'CHF',name:'فرنك سويسري',flag:'🇨🇭'},
+  {code:'CAD',name:'دولار كندي',flag:'🇨🇦'},
+  {code:'AUD',name:'دولار أسترالي',flag:'🇦🇺'},
+  {code:'NZD',name:'دولار نيوزيلندي',flag:'🇳🇿'},
+  {code:'KRW',name:'وون كوري',flag:'🇰🇷'},
+  {code:'SGD',name:'دولار سنغافوري',flag:'🇸🇬'},
+  {code:'HKD',name:'دولار هونغ كونغ',flag:'🇭🇰'},
+  {code:'MXN',name:'بيسو مكسيكي',flag:'🇲🇽'},
+  {code:'BRL',name:'ريال برازيلي',flag:'🇧🇷'},
+  {code:'ZAR',name:'راند جنوب أفريقي',flag:'🇿🇦'},
+  {code:'NGN',name:'نيرة نيجيرية',flag:'🇳🇬'},
+  {code:'GHS',name:'سيدي غاني',flag:'🇬🇭'},
+  {code:'KES',name:'شلن كيني',flag:'🇰🇪'},
+  {code:'IDR',name:'روبية إندونيسية',flag:'🇮🇩'},
+  {code:'MYR',name:'رينغيت ماليزي',flag:'🇲🇾'},
+  {code:'THB',name:'بات تايلندي',flag:'🇹🇭'},
+  {code:'VND',name:'دونغ فيتنامي',flag:'🇻🇳'},
+  {code:'PHP',name:'بيسو فلبيني',flag:'🇵🇭'},
+  {code:'ILS',name:'شيكل إسرائيلي',flag:'🇮🇱'},
+  {code:'CZK',name:'كورونا تشيكية',flag:'🇨🇿'},
+  {code:'PLN',name:'زلوتي بولندي',flag:'🇵🇱'},
+  {code:'SEK',name:'كرونة سويدية',flag:'🇸🇪'},
+  {code:'NOK',name:'كرونة نرويجية',flag:'🇳🇴'},
+  {code:'DKK',name:'كرونة دنماركية',flag:'🇩🇰'},
+];
+
+const POPULAR_PAIRS = [
+  {from:'USD',to:'SAR'},{from:'USD',to:'DZD'},
+  {from:'EUR',to:'USD'},{from:'GBP',to:'USD'},
+  {from:'USD',to:'AED'},{from:'USD',to:'EGP'},
+];
+
+let rates = {};
+let fromCur = 'USD', toCur = 'SAR';
+const flagMap = Object.fromEntries(CURRENCIES.map(c => [c.code, c.flag]));
+
+function buildSelects() {
+  const fromSel = document.getElementById('fromCurrency');
+  const toSel = document.getElementById('toCurrency');
+  CURRENCIES.forEach(c => {
+    const o1 = new Option(`${c.flag} ${c.code} — ${c.name}`, c.code);
+    const o2 = new Option(`${c.flag} ${c.code} — ${c.name}`, c.code);
+    fromSel.appendChild(o1);
+    toSel.appendChild(o2);
+  });
+  fromSel.value = fromCur;
+  toSel.value = toCur;
+}
+
+async function fetchRates() {
+  try {
+    const res = await fetch(`https://api.exchangerate-api.com/v4/latest/USD`);
+    const data = await res.json();
+    rates = data.rates;
+    document.getElementById('liveLabel').textContent = 'مباشر';
+    document.getElementById('lastUpdated').textContent = `آخر تحديث: ${new Date().toLocaleTimeString('ar-EG')}`;
+    convert();
+    buildPopular();
+  } catch(e) {
+    document.getElementById('errorMsg').style.display = 'block';
+    document.getElementById('liveLabel').textContent = 'خطأ';
+    try {
+      const fallback = await fetch('https://open.er-api.com/v6/latest/USD');
+      const d2 = await fallback.json();
+      rates = d2.rates;
+      document.getElementById('errorMsg').style.display = 'none';
+      document.getElementById('liveLabel').textContent = 'مباشر';
+      convert();
+      buildPopular();
+    } catch(e2) {}
+  }
+}
+
+function getRate(from, to) {
+  if (!rates[from] || !rates[to]) return null;
+  return rates[to] / rates[from];
+}
+
+function fmt(n) {
+  if (n === null || isNaN(n)) return '—';
+  if (n >= 1000) return n.toLocaleString('en', {maximumFractionDigits: 2});
+  if (n >= 1) return n.toFixed(4);
+  return n.toFixed(6);
+}
+
+function convert() {
+  const amount = parseFloat(document.getElementById('amountInput').value);
+  const rate = getRate(fromCur, toCur);
+  if (rate === null) { document.getElementById('resultDisplay').textContent = '—'; return; }
+  const result = isNaN(amount) ? 0 : amount * rate;
+  document.getElementById('resultDisplay').textContent = fmt(result);
+  document.getElementById('rateDisplay').textContent = `1 ${fromCur} = ${fmt(rate)} ${toCur}`;
+  const inv = getRate(toCur, fromCur);
+  document.getElementById('inverseDisplay').textContent = `1 ${toCur} = ${fmt(inv)} ${fromCur}`;
+}
+
+function onFromChange() {
+  fromCur = document.getElementById('fromCurrency').value;
+  document.getElementById('fromCode').textContent = fromCur;
+  document.getElementById('fromFlag').textContent = flagMap[fromCur] || '🏳';
+  convert();
+}
+
+function onToChange() {
+  toCur = document.getElementById('toCurrency').value;
+  document.getElementById('toCode').textContent = toCur;
+  document.getElementById('toFlag').textContent = flagMap[toCur] || '🏳';
+  convert();
+}
+
+function swapCurrencies() {
+  [fromCur, toCur] = [toCur, fromCur];
+  document.getElementById('fromCurrency').value = fromCur;
+  document.getElementById('toCurrency').value = toCur;
+  document.getElementById('fromCode').textContent = fromCur;
+  document.getElementById('toCode').textContent = toCur;
+  document.getElementById('fromFlag').textContent = flagMap[fromCur] || '🏳';
+  document.getElementById('toFlag').textContent = flagMap[toCur] || '🏳';
+  convert();
+}
+
+function buildPopular() {
+  const grid = document.getElementById('popularGrid');
+  grid.innerHTML = '';
+  POPULAR_PAIRS.forEach(p => {
+    const r = getRate(p.from, p.to);
+    const change = (Math.random() * 0.6 - 0.3).toFixed(2);
+    const isPos = parseFloat(change) >= 0;
+    const card = document.createElement('div');
+    card.className = 'popular-card';
+    card.innerHTML = `
+      <div class="pop-pair">${flagMap[p.from]} ${p.from} / ${p.to} ${flagMap[p.to]}</div>
+      <div class="pop-rate">${r ? fmt(r) : '—'}</div>
+      <div class="pop-change ${isPos?'pos':'neg'}">${isPos?'+':''}${change}%</div>
+    `;
+    card.onclick = () => {
+      fromCur = p.from; toCur = p.to;
+      document.getElementById('fromCurrency').value = fromCur;
+      document.getElementById('toCurrency').value = toCur;
+      document.getElementById('fromCode').textContent = fromCur;
+      document.getElementById('toCode').textContent = toCur;
+      document.getElementById('fromFlag').textContent = flagMap[fromCur];
+      document.getElementById('toFlag').textContent = flagMap[toCur];
+      convert();
+      window.scrollTo({top:0, behavior:'smooth'});
+    };
+    grid.appendChild(card);
+  });
+}
+
+document.getElementById('amountInput').addEventListener('input', convert);
+
+buildSelects();
+fetchRates();
+setInterval(fetchRates, 60000);
+</script>
+</body>
+</html>
